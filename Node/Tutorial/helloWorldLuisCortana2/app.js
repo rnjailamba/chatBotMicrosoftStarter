@@ -1,8 +1,38 @@
-var builder = require('botbuilder');
+// var builder = require('botbuilder');
 
-// Create bot and bind to console
-var connector = new builder.ConsoleConnector().listen();
+// // Create bot and bind to console
+// var connector = new builder.ConsoleConnector().listen();
+// var bot = new builder.UniversalBot(connector);
+
+var builder = require('botbuilder');
+var restify = require('restify');
+
+//MICROSOFT_APP_ID='363358fc-9d37-4891-90be-fd9fb2f8e7f9' MICROSOFT_APP_PASSWORD='Pbzuj7LafSoceTfmUAAMQH7' node app.js
+// MICROSOFT_APP_ID='363358fc-9d37-4891-90be-fd9fb2f8e7f9' MICROSOFT_APP_PASSWORD='Pbzuj7LafSoceTfmUAAMQH7' node --debug-brk=5314 app.js 
+
+//=========================================================
+// Bot Setup
+//=========================================================
+
+// Setup Restify Server
+var server = restify.createServer();
+server.listen(process.env.port || process.env.PORT || 3978, function () {
+   console.log('%s listening to %s', server.name, server.url);
+}); 
+
+// Create chat bot
+var connector = new builder.ChatConnector({
+    appId: process.env.MICROSOFT_APP_ID,
+    appPassword: process.env.MICROSOFT_APP_PASSWORD
+});
+// var connector = new builder.ConsoleConnector().listen();
 var bot = new builder.UniversalBot(connector);
+server.post('/api/messages', connector.listen());
+
+
+
+
+
 
 // Create LUIS recognizer that points at our model and add it as the root '/' dialog for our Cortana Bot.
 var model = 'https://api.projectoxford.ai/luis/v2.0/apps/c413b2ef-382c-45bd-8ff0-f76d60e2a821?subscription-key=c77f95149dea4c4c820a617d01720f31&q=';

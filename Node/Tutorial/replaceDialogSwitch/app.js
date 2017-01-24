@@ -12,7 +12,7 @@ var restify = require('restify');
 var server = restify.createServer();
 server.listen(process.env.port || process.env.PORT || 3978, function () {
    console.log('%s listening to %s', server.name, server.url);
-});
+}); 
 
 // Create chat bot
 var connector = new builder.ChatConnector({
@@ -47,13 +47,16 @@ bot.dialog('/room1', [
     function (session, results) {
         switch (results.response.entity) {
             case "open gate":
-                session.replaceDialog("/room2");
+                // session.replaceDialog("/room2");
+                session.send("Open gate selected,thats all for today!.");
                 break;
             case "south":
-                session.replaceDialog("/");
+                session.send("South selected,thats all for today!.");
+                // session.replaceDialog("/");
                 break;
             case "west":
-                session.replaceDialog("/room3");
+                session.send("West selected,thats all for today!.");            
+                // session.replaceDialog("/room3");
                 break;
             default:
                 session.replaceDialog("/room1");

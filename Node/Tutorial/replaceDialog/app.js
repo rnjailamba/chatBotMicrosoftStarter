@@ -23,7 +23,7 @@ server.post('/api/messages', connector.listen());
 
 bot.dialog('/', [
     function (session) {
-        session.beginDialog('/phonePrompt');
+        session.beginDialog('/phonePrompt'); 
     },
     function (session, results) {
         session.send('Got it... Setting number to %s', results.response);
