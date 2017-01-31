@@ -39,6 +39,7 @@ intents.matches(/^change name/i, [
 
 intents.onDefault([
     function (session, args, next) {
+        // session.userData.name = undefined;
         if (!session.userData.name) {
             session.beginDialog('/profile');
         } else {
@@ -46,7 +47,7 @@ intents.onDefault([
         }
     },
     function (session, results) {
-        session.send('Hello %s!', session.userData.name);
+        session.send('Helloo %s!', session.userData.name);
     }
 ]);
 

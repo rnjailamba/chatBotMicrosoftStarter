@@ -32,13 +32,14 @@ server.post('/api/messages', connector.listen());
 // var model = 'https://westus.api.cognitive.microsoft.com/luis/v2.0/apps/4ae18224-cdb3-4676-8fef-ab92401a91b0?subscription-key=c77f95149dea4c4c820a617d01720f31&timezoneOffset=0.0&verbose=true&q=';
 var model = 'https://westus.api.cognitive.microsoft.com/luis/v2.0/apps/45920bdd-a3db-4d6e-b05e-ebfbf5a8e262?subscription-key=5871c7a8471840cd9122d563643af60b&verbose=true&q=';
 var recognizer = new builder.LuisRecognizer(model);
-var dialog = new builder.IntentDialog({ recognizers: [recognizer] });
-bot.dialog('/', dialog);
+var intents = new builder.IntentDialog({ recognizers: [recognizer] });
+bot.dialog('/', intents);
 
 // Add intent handlers
 
-dialog.matches('Greeting', [
+intents.matches('Greeting', [
     function (session, args, next) {
+        // session.userData.name = undefined;
         if (!session.userData.name) {
             session.send("Welcome to Life in Control!\n*Thank you for trusting us with your health. As your care team, we shall do everything we can( to keep you fit and healthy!)/(for your health and well-being!)But always remember, the most important member in your care team is you!Now, it's time for you to meet Maya, your personal health assistant!");
             builder.Prompts.text(session, "What is your name?");
@@ -47,30 +48,128 @@ dialog.matches('Greeting', [
         }
     },
     function (session, results) {
-        if(results.response){
+        if(!session.userData.name){
             session.userData.name = results.response;
         }
         session.send('Hello %s!', session.userData.name);
-        session.endDialog();
+        // session.endDialog();
+        session.beginDialog('/sample');
+
     }
 ]);
 
 
-dialog.matches(/^change name/i, [
+intents.matches(/^change name/i, [
     function (session) {
-        // session.beginDialog('/profile');
-                session.send('Okk... Changed your name to %s', session.userData.name);
-
+        session.send('Okk... Changed your name to %s', session.userData.name);
     },
     function (session, results) {
         session.send('Ok... Changed your name to %s', session.userData.name);
     }
 ]);
 
+bot.dialog('/profile', [
+    function (session) {
+        builder.Prompts.text(session, 'Hi! What is your name?');
+    },
+    function (session, results) {
+        session.userData.name = results.response;
+        session.endDialog();
+    }
+]);
+
+bot.dialog('/sample', [
+    function (session) {
+        builder.Prompts.choice(session, "Choose an option:", 'Give me expert advice based on my BMI|Clear Data|Magic 8-Ball|Quit');
+    },
+    function (session, results) {
+        switch (results.response.index) {
+            case 0:
+                session.beginDialog('/enterBMI');
+                break;            
+            case 1:
+                session.beginDialog('/clearData');
+                break;
+            case 2:
+                session.beginDialog('/enterBMI');
+                break;
+
+            default:
+                session.endDialog();
+                break;
+        }
+    }
+]);
+
+
+bot.dialog('/clearData', [
+    function (session, args) {
+        session.userData.weight = undefined;
+        session.userData.name = undefined;
+                    session.endDialog();
+    }
+   
+]);
+
+bot.dialog('/enterBMI', [
+    function (session, args,next) {
+        if(!session.userData.weight){
+            builder.Prompts.text(session, 'Hi! What is your wt?');
+        }
+        else{
+            next();
+        }
+        // builder.Prompts.choice(session, "Choose heads or tails.", "heads|tails", { listStyle: builder.ListStyle.none })
+    },
+    function (session, results,next) {
+        if(session.userData.weight){
+            if(session.userData.height){
+                next();
+            }
+            else{
+                builder.Prompts.text(session, 'What is your ht?');            
+            }
+        }
+        else{
+            if(isNaN(results.response)){
+                session.send('Please enter a number');
+                session.replaceDialog('/enterBMI');
+            }
+            else{
+                session.userData.weight = results.response;
+                session.send('Ok... your weight is %s', session.userData.weight);
+                builder.Prompts.text(session, 'What is your ht?');            
+            }
+        }
+    },
+    function (session, results,next) {
+        if(session.userData.weight && session.userData.height){
+            next();
+        }      
+        else{
+            if(isNaN(results.response)){
+                session.send('Please enter a number');
+                session.replaceDialog('/enterBMI');
+            }
+            else{
+                session.userData.height = results.response;
+                session.send('Ok... your height is %s', session.userData.height);
+                next();
+            }
+        }  
+    },
+    function (session, results,next) {
+        session.send('Ok... your height is %s and wt is %s and bmi = %s', session.userData.height,session.userData.weight,
+            session.userData.weight/session.userData.height);
+        session.endDialog();
+    }    
+        
+
+
+  
+]);
 
 
 
 
-
-
-dialog.onDefault(builder.DialogAction.send("I'm sorry I didn't understand. Try saying hello to me   ."));
+intents.onDefault(builder.DialogAction.send("I'm sorry I didn't understand. Try saying hello to me."));
