@@ -58,6 +58,12 @@ intents.matches('Greeting', [
     }
 ]);
 
+intents.matches('EnterBMI', [
+    function (session, args, next) {
+        session.beginDialog('/enterBMI');
+    }
+]);
+
 
 intents.matches(/^change name/i, [
     function (session) {
@@ -80,7 +86,7 @@ bot.dialog('/profile', [
 
 bot.dialog('/sample', [
     function (session) {
-        builder.Prompts.choice(session, "Choose an option:", 'Give me expert advice based on my BMI|Clear Data|Magic 8-Ball|Quit');
+        builder.Prompts.choice(session, "Choose an option:", 'Give me expert advice based on my BMI|Clear Data|Quit|Enter any custom question');
     },
     function (session, results) {
         switch (results.response.index) {
@@ -91,9 +97,11 @@ bot.dialog('/sample', [
                 session.beginDialog('/clearData');
                 break;
             case 2:
-                session.beginDialog('/enterBMI');
+                session.beginDialog('/quit');
                 break;
-
+            case 3:
+                session.beginDialog('/enterAnyCustom');
+                break;                
             default:
                 session.endDialog();
                 break;
@@ -101,12 +109,27 @@ bot.dialog('/sample', [
     }
 ]);
 
+bot.dialog('/enterAnyCustom', [
+    function (session, args) {
+        session.endDialog();
+    }
+]);
+
+bot.dialog('/quit', [
+    function (session, args) {
+        session.send('Quitting, see you next time, stay responsible and healthy till next time!');
+        session.endDialog();
+    }
+]);
+
 
 bot.dialog('/clearData', [
     function (session, args) {
+        session.send('Cleared data ..., ask me anything or say hello again to enter your data');        
         session.userData.weight = undefined;
+        session.userData.height = undefined;
         session.userData.name = undefined;
-                    session.endDialog();
+        session.endDialog();
     }
    
 ]);
@@ -153,6 +176,9 @@ bot.dialog('/enterBMI', [
             }
             else{
                 session.userData.height = results.response;
+                if(session.userData.height > 6){
+                    session.send('Oh my youre a tall one');                    
+                }
                 session.send('Ok... your height is %s', session.userData.height);
                 next();
             }
@@ -163,11 +189,9 @@ bot.dialog('/enterBMI', [
             session.userData.weight/session.userData.height);
         session.endDialog();
     }    
-        
-
-
-  
-]);
+]).cancelAction('cancel', "Ok cancelling taking your data.", {
+    matches: /^(cancel|nevermind|exit|no)/i
+});
 
 
 
