@@ -9,6 +9,7 @@ var restify = require('restify');
 
 //MICROSOFT_APP_ID='363358fc-9d37-4891-90be-fd9fb2f8e7f9' MICROSOFT_APP_PASSWORD='Pbzuj7LafSoceTfmUAAMQH7' node app.js
 // MICROSOFT_APP_ID='363358fc-9d37-4891-90be-fd9fb2f8e7f9' MICROSOFT_APP_PASSWORD='Pbzuj7LafSoceTfmUAAMQH7' node --debug-brk=5314 app.js 
+//MICROSOFT_APP_ID='66abcc6a-33e6-495c-819d-bd574b3604c5' MICROSOFT_APP_PASSWORD='fxJn2cjcNunesZmqDZxMhVT' node app.js
 
 //=========================================================
 // Bot Setup
